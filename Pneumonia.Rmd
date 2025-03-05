@@ -17,7 +17,6 @@ formula<-as.formula(model)
 
 ```
 
-
 ```{r dataread and sample,echo=FALSE}
 library(caret)
 library(readxl)
@@ -89,6 +88,7 @@ legend("bottomright",
        bty = "n")            # 无边框
 
 ```
+
 ```{r}
 
 library(pROC)
@@ -100,11 +100,12 @@ summary(origin)
 #str()
 roc_multivar_1<-roc(origin$Prognosis,origin$pred)
 plot.roc(roc_multivar_1,col="black",
-         main="origin Model",
+         main="New Model",
      print.auc = TRUE,
      grid = TRUE)  
 
 ```
+
 ```{r}
 
 library(pROC)
@@ -138,7 +139,6 @@ plot.roc(roc_multivar_1,col="black",
      grid = TRUE)  
 
 ```
-
 
 ```{r}
 library(rms)
@@ -242,7 +242,6 @@ legend(0.55, 0.35,
 
 ```
 
-
 ```{r}
 formula<-as.formula(Prognosis~CURB_age+D_Dimer+ALB)
 fit<- lrm(formula,data=test,x=TRUE,y=TRUE)  #拟合模型
@@ -283,8 +282,6 @@ legend(0.55, 0.35,
 
 ```
 
-
-
 ```{r}
 plot(cal,
      xlim = c(0,1),
@@ -302,7 +299,6 @@ legend(0.55,0.35,
        col = c("black","red","green"),
        bty="n") #"o"为加边框
 ```
-
 
 ```{r}
 # 加载所需包
@@ -322,7 +318,6 @@ dca(Prognosis ~ pred,
        y = "Net Benefit") +
   theme_minimal()
 ```
-
 
 ```{r}
 #copd roc
@@ -359,4 +354,61 @@ plot.roc(rocobj3, main="ALB", col = "black", print.thres="best", legacy.axes = T
 
 # 重置图形参数
 par(mfrow = c(1, 1))
+```
+
+```{r}
+library(rmda)
+library(readxl)
+
+fit.model1 <-  decision_curve(model,data = origin,thresholds = seq(0, 1, by = .005),  bootstraps = 10)
+plot_decision_curve(fit.model1,  curve.names = "baseline model")
+
+
+
+
+plot_decision_curve(list(fit.model1),
+                    curve.names = c("dca", ), 
+                    cost.benefit.axis =FALSE,
+                    xlim = c(0, 1), # 可以设置x轴范围
+                    legend.position = "topright", # 图例位置,
+                    col = c("red","blue"), # 自定义颜色
+                    confidence.intervals = "none",
+                    lty = c(1,2), # 线型，注意顺序
+                    lwd = c(3,2,2,1) # 注意顺序，先是自己的2个模型，然后是All,然后是None
+                    )
+```
+
+```{r}
+library(rmda)
+library(readxl)
+
+# 假设model是已拟合的模型公式（例如：y ~ x1 + x2）
+fit.model1 <- decision_curve(
+  model, 
+  data = origin,
+  thresholds = seq(0, 1, by = 0.1),
+  bootstraps = 10
+)
+
+# 绘制DCA曲线（修改版）
+plot_decision_curve(
+  list(fit.model1),  # 如果要对比多个模型，在此处添加（如list(fit1, fit2)）
+  
+  # 关键参数调整
+  curve.names = c(" Model data"),  # 名称数量需与模型数量一致
+  cost.benefit.axis = FALSE,
+  xlim = c(0, 0.8),   # 推荐缩小x轴范围（通常临床决策阈值不会超过0.5）
+  legend.position = "topright",  # 更不易遮挡曲线的位置
+  
+  # 图形样式参数
+  col = c("red"),     # 颜色数量需与模型数量一致
+  confidence.intervals = "none",     # 已关闭置信区间
+  lty = c(2),         # 线型（1=实线，2=虚线）
+  lwd = c(2),         # 线宽（主模型用粗线）
+  
+  # 附加参数调整
+  xlab = "Threshold Probability",    # 自定义x轴标签
+  ylab = "Net Benefit",              # 自定义y轴标签
+)
+
 ```
