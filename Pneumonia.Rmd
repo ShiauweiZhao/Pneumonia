@@ -407,7 +407,6 @@ plot_decision_curve(
   lwd = c(2),         # 线宽（主模型用粗线）
   
   # 附加参数调整
-  xlab = "Threshold Probability",    # 自定义x轴标签
   ylab = "Net Benefit",              # 自定义y轴标签
 )
 
